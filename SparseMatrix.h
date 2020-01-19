@@ -33,6 +33,55 @@ class SparseMatrix {
     Node<T> *_head;
 
     /**
+    @brief iterativeColumnAdd
+
+    Si occupa dell'inserimento all'interno della riga, che è stata già individuata
+    @param curr il nodo con il primo elemento della riga in questione
+    @param value il valore
+    @param j la colonna
+    **/
+    void iterativeColumnAdd(const Node<T> *up, const Node<T> *init, const T value, const uint j) {
+      Node<T> *current = (Node<T>*)init;
+      Node<T> *upNode = (Node<T>*)up;
+      Node<T> *tmp = new Node<T>(value, current->i, j);
+      Node<T> *leftNode = 0;
+
+      while(current != 0) {
+        if (current->j == j) {
+          current->value = value;
+          return;
+        }
+        if (current->j < j) {
+          if (current->right) {
+            leftNode = current;
+            current = current->right;
+          }
+          else {
+            current->right = tmp;
+            _counter++;
+            return;
+          }
+        }
+        else {
+          if (leftNode) {
+            leftNode->right = tmp;
+            tmp->right = current;
+            _counter++;
+            return;
+          }
+          else {
+            upNode->down = tmp;
+            tmp->right = current;
+            tmp->down = current->down;
+            current->down = 0;
+            _counter++;
+            return;
+          }
+        }
+      }
+    }
+
+    /**
     @brief innerIterativeAdd
 
     Si occupa dell'inserimento effettivo e dell'incremento del contatore degli elementi, una volta scartati alcuni "casi base"
@@ -41,83 +90,44 @@ class SparseMatrix {
     @param j la colonna
     **/
     void innerIterativeAdd(const T value, const uint i, const uint j) {
+      // Se non ho 0 elementi e la i è maggiore/uguale della i della head
       if (i < _head->i) {
         return; // ERROR
       }
-      // Se non ho 0 elementi e la i è maggiore/uguale della i della head
+
+      bool sameRow = false;
       Node<T> *tmp = new Node<T>(value, i, j);
       Node<T> *current = _head;
+      Node<T> *upNode = 0;
 
-      while(current != 0) {
-        // Se la i dell'elemento corrente è minore della nuova i
-        if (current->i < i) {
-          // Ed ho un elemento più sotto
-          if (current->down) {
-            // Ed esso ha una i maggiore della nuova i, allora inserisco un nuovo nodo tra current e il nodo sotto
-            if (current->down->i > i) {
-              Node<T> *nextDown = current->down;
-              current->down = tmp;
-              tmp->down = nextDown;
-              _counter++;
-              return;
-            }
-            // Ed esso ha una i uguale alla nuova i, ma una j maggiore, allora devo creare il nodo sotto e mettere i link nel nuovo nodo
-            else {
-              if (current->down->i == i && current->down->j > j) {
-                Node<T> *nextDown = current->down;
-                current->down = tmp;
-                tmp->right = nextDown;
-                tmp->down = nextDown->down;
-                nextDown->down = 0;
-                _counter++;
-              }
-              else {
-                current = current->down;
-              }
-            }
+      while(current != 0 && !sameRow) {
+        if (current->i == i) {
+          sameRow = true;
+        }
+        else if (current->i < i) {
+          if (current->down != 0) {
+            upNode = current;
+            current = current->down;
           }
-          // Se non vi è un elemento più sotto metto il nuovo valore in un nodo più sotto
           else {
             current->down = tmp;
             _counter++;
             return;
           }
         }
-        // Se la i dell'elemento corrente è uguale alla nuova i
         else {
-          // E se j == alla nuova j, devo fare l'overwrite del valore
-          if (current->j == j) {
-            current->value = value;
+          if (!upNode) {
+            std::cout << "eccezione" << std::endl;
+            return; // ECCEZIONE
           }
-          // Se la j è minore della nuova j (se la j è maggiore il caso è già nella iterativeAdd)
-          else {
-            // E non ho un elemento a destra, metto un nuovo nodo a destra
-            if (!current->right) {
-              current->right = tmp;
-              _counter++;
-            }
-            // Ed ho un elemento a destra
-            else {
-              // Con j minore della nuova j allora mi sposto a destra e ricomincio il ciclo
-              if (current->right->j < j) {
-                current = current->right;
-              }
-              // con j maggiore della nuova, allora metto il nuovo nodo tra il corrente ed il suo nodo destro
-              else if (current->right->j > j) {
-                Node<T> *nextRight = current->right;
-                current->right = tmp;
-                tmp->right = nextRight;
-                _counter++;
-                return;
-              }
-              // Se j è uguale alla nuova j allora devo farne l'overwrite
-              else {
-                current->right->value = value;
-                return;
-              }
-            }
-          }
+          upNode->down = tmp;
+          tmp->down = current;
+          _counter++;
+          return;
         }
+      }
+      if (sameRow) {
+        iterativeColumnAdd(upNode, current, value, j);
       }
     }
 
