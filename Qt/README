@@ -1,0 +1,2 @@
+Qt version: 5.12.6 lts
+TLS initialization failed: aggiungere nel momento di installazione di Qt Creator (è un componente sotto "Developer and Designer Tools"), poi aggiungere al path oppure copiare nella build sotto debug/ il contenuto della cartella "C:\Qt\Tools\OpenSSL\Win_x64\bin"

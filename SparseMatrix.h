@@ -33,6 +33,18 @@ class SparseMatrix {
     T _defaultValue;
     uint _i, _j, _counter;
     Node<T> *_head;
+    
+    /**
+    @brief clear
+
+    Metodo privato che si occupa di ripulire la matrice
+    **/
+    void clear() {
+      delete _head;
+      _i = 0;
+      _j = 0;
+      _counter = 0;
+    }
 
     /**
     @brief iterativeColumnAdd
@@ -207,7 +219,32 @@ class SparseMatrix {
     SparseMatrix(const T defaultValue) : _head(0), _i(0), _j(0), _counter(0) {
       _defaultValue = defaultValue;
     }
-    
+
+    /**
+    @brief Copy constructor (METODO FONDAMENTALE)
+
+    Costruttore copia. Permette di istanziare una SparseMatrix con i valori
+    presi da un altra SparseMatrix di tipo compatibile.
+    @param other_sarr (un altro sorted array, da usare per creare la copia)
+    **/
+    SparseMatrix(const SparseMatrix &otherMatrix) {
+      try {
+        Node<T> *rightNode, *downNode = (Node<T>*)otherMatrix->_head;
+
+        while (downNode) {
+          rightNode = downNode;
+
+          while (rightNode) {
+            add(new Node<T>((const T)rightNode->value, (const uint)rightNode->i, (const uint)rightNode->j));
+          }
+          downNode = downNode->down; 
+        }
+      } catch(...) {
+        clear();
+        throw;
+      }
+    }
+
     /**
     @brief add
     
@@ -234,7 +271,7 @@ class SparseMatrix {
     Distruttore. Rimuove la memoria allocata dall'oggetto.
     **/
     ~SparseMatrix() {
-      delete _head;
+      clear();
     }
     
     /**
@@ -283,17 +320,17 @@ class SparseMatrix {
     Stampa a video gli elementi della matrice sparsa "avvicinandoli"
     **/
     void display() {
-      Node<T> *rightP, *downP = _head;
+      Node<T> *rightNode, *downNode = _head;
 
-      while (downP) {
-        rightP = downP; 
+      while (downNode) {
+        rightNode = downNode; 
 
-        while (rightP) { 
-            std::cout << rightP->value << "(" << rightP->i << "," << rightP->j << ") "; 
-            rightP = rightP->right; 
+        while (rightNode) { 
+            std::cout << rightNode->value << "(" << rightNode->i << "," << rightNode->j << ") "; 
+            rightNode = rightNode->right; 
         }
         std::cout << std::endl; 
-        downP = downP->down; 
+        downNode = downNode->down; 
       }
     }
 };

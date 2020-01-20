@@ -81,8 +81,25 @@ void testAdd() {
   sparseMatrix1.display();
 }
 
+void testCopyConstructor() {
+  /// - Test sul copy constructor
+  cout << "Testing default constructor..." << endl;
+  SparseMatrix<int> sparseMatrix1(0);
+  sparseMatrix1.add(1, 0, 0);
+  sparseMatrix1.add(1, 0, 1);
+  sparseMatrix1.add(1, 0, 2);
+  sparseMatrix1.add(1, 1, 1);
+  sparseMatrix1.add(1, 1, 2);
+  sparseMatrix1.add(1, 2, 0);
+  sparseMatrix1.add(1, 5, 5);
+  SparseMatrix<int> sparseMatrix2(sparseMatrix1);
+  sparseMatrix1.add(2, 5, 6);
+  sparseMatrix2.display();
+}
+
 int main() {
-  //testConstructors();
+  testConstructors();
   testAdd();
+  testCopyConstructor();
   return 0;
 }
